@@ -126,9 +126,8 @@ $task_list = [
 
                 <table class="tasks">
                     <?php foreach ($task_list as $key => $item): ?>
-                        <tr class="tasks__item task
-                            <?php if ($item['done']): ?>task--completed<?php endif; ?>
-                            <?php if($item['done'] and !$show_complete_tasks): ?>visually-hidden<?php endif; ?>">
+                        <?php if($item['done'] and !$show_complete_tasks) { continue; } ?>
+                        <tr class="tasks__item task <?php if ($item['done']): ?>task--completed<?php endif; ?>">
                             <td class="task__select">
                                 <label class="checkbox task__checkbox">
                                     <input class="checkbox__input visually-hidden task__checkbox" type="checkbox" value="1" <?php if ($item['done']): ?>checked<?php endif; ?>>
