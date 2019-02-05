@@ -31,17 +31,27 @@ $task_list = [
     ],
     [
         'task' => 'Купить корм для кота',
-        'date' => 'Нет',
+        'date' => '',
         'category' => 'Домашние дела',
         'done' => false
     ],
     [
         'task' => 'Заказать пиццу',
-        'date' => 'Нет',
+        'date' => '',
         'category' => 'Домашние дела',
         'done' => false
     ]
 ];
+// функция подсчета задач в проекте
+function tasks_number ($total_task_list, $project) {
+    $number = 0;
+    foreach ($total_task_list as $task) {
+        if ($project === $task['category']) {
+            $number++;
+        }
+    }
+    return $number;
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -90,7 +100,7 @@ $task_list = [
                         <?php foreach ($projects as $project_name): ?>
                             <li class="main-navigation__list-item">
                                 <a class="main-navigation__list-item-link" href="#"><?=$project_name; ?></a>
-                                <span class="main-navigation__list-item-count">0</span>
+                                <span class="main-navigation__list-item-count"><?=tasks_number($task_list, $project_name); ?></span>
                             </li>
                         <?php endforeach; ?>
                     </ul>
