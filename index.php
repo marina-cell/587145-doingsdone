@@ -45,8 +45,8 @@ $task_list = [
 // функция подсчета задач в проекте
 function tasks_number ($total_task_list, $project) {
     $number = 0;
-    foreach ($total_task_list as $key => $value) {
-        if ($project === $value['category']) {
+    foreach ($total_task_list as $task) {
+        if ($project === $task['category']) {
             $number++;
         }
     }
