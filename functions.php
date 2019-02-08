@@ -3,7 +3,7 @@
 // Шаблонизатор
 function include_template($name, $data) {
     $name = 'templates/' . $name;
-    $result = '';
+    $result = 'Ошибка: файл не найден';
 
     if (!is_readable($name)) {
         return $result;
@@ -27,9 +27,4 @@ function tasks_number ($total_task_list, $project) {
         }
     }
     return $number;
-}
-
-// Фильтр для защиты от XSS
-function filter_usr_data($string) {
-    return htmlspecialchars($string);
 }
