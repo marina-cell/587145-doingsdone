@@ -28,3 +28,19 @@ function tasks_number ($total_task_list, $project) {
     }
     return $number;
 }
+
+// Проверка даты на приближение к дедлайну
+function is_date_important ($date) {
+    $deadline_span = 86400; // секунд в 24 часах
+
+    if(strlen($date) > 0) {
+        $date_ts = strtotime($date);
+        $ts = time();
+
+        if($date_ts - $ts < $deadline_span) {
+            return true;
+        }
+    }
+
+    return false;
+}
