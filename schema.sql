@@ -4,7 +4,8 @@ CREATE DATABASE doingsdone
 USE doingsdone;
 CREATE TABLE project (
                        id INT AUTO_INCREMENT PRIMARY KEY,
-                       name CHAR(128)
+                       name CHAR(128),
+                       user_id INT UNSIGNED
 );
 CREATE TABLE task (
                     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -13,7 +14,9 @@ CREATE TABLE task (
                     state TINYINT DEFAULT 0,
                     name CHAR(128),
                     file CHAR,
-                    deadline DATETIME
+                    deadline DATETIME,
+                    user_id INT UNSIGNED,
+                    project_id INT UNSIGNED
 );
 CREATE TABLE user (
                     id INT AUTO_INCREMENT PRIMARY KEY,
