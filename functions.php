@@ -22,7 +22,7 @@ function include_template($name, $data) {
 function tasks_number ($total_task_list, $project) {
     $number = 0;
     foreach ($total_task_list as $task) {
-        if ($project === $task['category']) {
+        if ($project === $task['project_name']) {
             $number++;
         }
     }

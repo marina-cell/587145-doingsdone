@@ -23,13 +23,13 @@
 
 <table class="tasks">
     <?php foreach ($task_list as $key => $item): ?>
-        <?php if($item['done'] and !$show_complete_tasks) { continue; } ?>
-        <tr class="tasks__item task <?php if ($item['done']): ?>task--completed<?php endif; ?>
-                                    <?php if (is_date_important($item['date'])): ?>task--important<?php endif; ?>">
+        <?php if($item['state'] and !$show_complete_tasks) { continue; } ?>
+        <tr class="tasks__item task <?php if ($item['state']): ?>task--completed<?php endif; ?>
+                                    <?php if (is_date_important($item['deadline'])): ?>task--important<?php endif; ?>">
             <td class="task__select">
                 <label class="checkbox task__checkbox">
-                    <input class="checkbox__input visually-hidden task__checkbox" type="checkbox" value="1" <?php if ($item['done']): ?>checked<?php endif; ?>>
-                    <span class="checkbox__text"><?=htmlspecialchars($item['task']); ?></span>
+                    <input class="checkbox__input visually-hidden task__checkbox" type="checkbox" value="1" <?php if ($item['state']): ?>checked<?php endif; ?>>
+                    <span class="checkbox__text"><?=htmlspecialchars($item['task_name']); ?></span>
                 </label>
             </td>
 
@@ -37,7 +37,7 @@
                 <a class="download-link" href="#">Home.psd</a>
             </td>
 
-            <td class="task__date"><?=$item['date']; ?></td>
+            <td class="task__date"><?=date("d.m.Y", strtotime($item['deadline'])); ?></td>
         </tr>
     <?php endforeach; ?>
 </table>
