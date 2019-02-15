@@ -13,23 +13,8 @@ if (!$link){
 }
 
 // Запросы данных из SQL
-$projects = db_fetch_data($link,
-    'SELECT p.name, COUNT(t.name) AS tasks_count
-            FROM project p JOIN task t 
-              ON p.id = t.project_id 
-             AND p.user_id = ?
-           GROUP BY p.name 
-           ORDER BY p.name;',
-    [$cur_user_id]
-);
-
-$task_list = db_fetch_data($link,
-    'SELECT *, task.name AS task_name, project.name AS project_name 
-            FROM task JOIN project
-           WHERE project.id = task.project_id
-             AND task.user_id = ?',
-    [$cur_user_id]
-);
+$projects = get_projects($link, $cur_user_id);
+$task_list = get_tasks($link, $cur_user_id);
 
 
 // Шаблонизация

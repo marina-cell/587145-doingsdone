@@ -53,3 +53,23 @@ function db_fetch_data ($link, $sql, $query_data = []) {
 
     return $result_data;
 }
+
+function get_projects ($link, $user_id) {
+    return db_fetch_data($link,
+        'SELECT p.name, COUNT(t.name) AS tasks_count
+            FROM project p JOIN task t 
+              ON p.id = t.project_id 
+             AND p.user_id = ?
+           GROUP BY p.name 
+           ORDER BY p.name;',
+        [$user_id]);
+}
+
+function get_tasks ($link, $user_id) {
+    return db_fetch_data($link,
+        'SELECT *, task.name AS task_name, project.name AS project_name 
+              FROM task JOIN project
+             WHERE project.id = task.project_id
+               AND task.user_id = ?',
+        [$user_id]);
+}
