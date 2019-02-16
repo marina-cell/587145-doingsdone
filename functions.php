@@ -1,5 +1,7 @@
 <?php
 
+require_once('mysql_helper.php');
+
 // Шаблонизатор
 function include_template($name, $data) {
     $name = 'templates/' . $name;
@@ -18,17 +20,6 @@ function include_template($name, $data) {
     return $result;
 }
 
-// Подсчет задач в проекте
-function tasks_number ($total_task_list, $project) {
-    $number = 0;
-    foreach ($total_task_list as $task) {
-        if ($project === $task['category']) {
-            $number++;
-        }
-    }
-    return $number;
-}
-
 // Проверка даты на приближение к дедлайну
 function is_date_important ($date) {
     $deadline_span = 86400; // секунд в 24 часах
@@ -44,4 +35,41 @@ function is_date_important ($date) {
     }
 
     return $is_deadline;
+}
+
+// Безопасное получение данных из БД MySQL (с помощью подготовленных выражений)
+function db_fetch_data ($link, $sql, $query_data = []) {
+    $result_data = [];
+
+    $stmt = db_get_prepare_stmt($link, $sql, $query_data);
+    mysqli_stmt_execute($stmt);
+
+    if ($res = mysqli_stmt_get_result($stmt)) {
+        $result_data = mysqli_fetch_all($res, MYSQLI_ASSOC);
+    }
+    else {
+        print("Ошибка при выполнении запроса: " . mysqli_error($link));
+    }
+
+    return $result_data;
+}
+
+function get_projects ($link, $user_id) {
+    return db_fetch_data($link,
+        'SELECT p.name, COUNT(t.name) AS tasks_count
+            FROM project p JOIN task t 
+              ON p.id = t.project_id 
+             AND p.user_id = ?
+           GROUP BY p.name 
+           ORDER BY p.name;',
+        [$user_id]);
+}
+
+function get_tasks ($link, $user_id) {
+    return db_fetch_data($link,
+        'SELECT *, task.name AS task_name, project.name AS project_name 
+              FROM task JOIN project
+             WHERE project.id = task.project_id
+               AND task.user_id = ?',
+        [$user_id]);
 }
