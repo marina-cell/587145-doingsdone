@@ -54,22 +54,47 @@ function db_fetch_data ($link, $sql, $query_data = []) {
     return $result_data;
 }
 
-function get_projects ($link, $user_id) {
-    return db_fetch_data($link,
-        'SELECT p.name, COUNT(t.name) AS tasks_count
-            FROM project p JOIN task t 
-              ON p.id = t.project_id 
-             AND p.user_id = ?
-           GROUP BY p.name 
-           ORDER BY p.name;',
-        [$user_id]);
+function is_correct_project_id ($link, $user_id, $pr_id) {
+    $sql = 'SELECT id, user_id
+              FROM project
+             WHERE id = ?
+               AND user_id = ?;';
+
+    return sizeof(db_fetch_data($link, $sql, [$pr_id, $user_id]));
 }
 
-function get_tasks ($link, $user_id) {
-    return db_fetch_data($link,
-        'SELECT *, task.name AS task_name, project.name AS project_name 
+function get_projects ($link, $user_id) {
+    $sql = 'SELECT p.id, p.name, COUNT(t.name) AS tasks_count
+              FROM task t JOIN project p
+                ON t.project_id  = p.id
+             WHERE t.user_id = ?
+          GROUP BY t.project_id 
+          ORDER BY p.name;';
+
+    return db_fetch_data($link, $sql, [$user_id]);
+}
+
+function get_tasks ($link, $user_id, $pr_id, $is_show) {
+    $data = [$user_id];
+
+    $additional_conditions = ' ';
+    if($pr_id) {
+        $additional_conditions .= ' AND task.project_id = ? '; // если задан ID проекта
+        $data[] = $pr_id;
+    }
+    if(!$is_show) {
+        $additional_conditions .= ' AND task.state = 0 ';     // если нужно скрыть завершенные задачи (state = 1)
+    }
+
+    $sql = 'SELECT *, task.name AS task_name, project.name AS project_name 
               FROM task JOIN project
              WHERE project.id = task.project_id
-               AND task.user_id = ?',
-        [$user_id]);
+               AND task.user_id = ?
+                   ' . $additional_conditions . '
+          ORDER BY task.deadline';
+
+    return db_fetch_data($link, $sql, $data);
 }
+
+
+
