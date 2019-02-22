@@ -55,21 +55,21 @@ function db_fetch_data ($link, $sql, $query_data = []) {
 }
 
 function is_correct_project_id ($link, $user_id, $pr_id) {
-    return db_fetch_data($link,
-        'SELECT id, user_id
-            FROM project
-           WHERE id = ?
-             AND user_id = ?;',
-        [$pr_id, $user_id]);
+    $sql = 'SELECT id, user_id
+              FROM project
+             WHERE id = ?
+               AND user_id = ?;';
+
+    return sizeof(db_fetch_data($link, $sql, [$pr_id, $user_id]));
 }
 
 function get_projects ($link, $user_id) {
     $sql = 'SELECT p.id, p.name, COUNT(t.name) AS tasks_count
-            FROM task t JOIN project p
-              ON t.project_id  = p.id
-           WHERE t.user_id = ?
-           GROUP BY t.project_id 
-           ORDER BY p.name;';
+              FROM task t JOIN project p
+                ON t.project_id  = p.id
+             WHERE t.user_id = ?
+          GROUP BY t.project_id 
+          ORDER BY p.name;';
 
     return db_fetch_data($link, $sql, [$user_id]);
 }
@@ -88,10 +88,10 @@ function get_tasks ($link, $user_id, $pr_id, $is_show) {
 
     $sql = 'SELECT *, task.name AS task_name, project.name AS project_name 
               FROM task JOIN project
-            WHERE project.id = task.project_id
-              AND task.user_id = ?
-                  ' . $additional_conditions . '
-         ORDER BY task.deadline';
+             WHERE project.id = task.project_id
+               AND task.user_id = ?
+                   ' . $additional_conditions . '
+          ORDER BY task.deadline';
 
     return db_fetch_data($link, $sql, $data);
 }
