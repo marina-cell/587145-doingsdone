@@ -65,21 +65,25 @@ function get_projects ($link, $user_id) {
         [$user_id]);
 }
 
-function get_tasks ($link, $user_id, $pr_id = null) {
-    if(isset($pr_id)) {
-        $tasks = db_fetch_data($link,
-            'SELECT *, task.name AS task_name, project.name AS project_name 
-              FROM task JOIN project
-             WHERE project.id = task.project_id AND task.project_id = ?
-               AND task.user_id = ?',
-            [$pr_id, $user_id]);
-    } else {
-        $tasks = db_fetch_data($link,
-            'SELECT *, task.name AS task_name, project.name AS project_name 
-              FROM task JOIN project
-             WHERE project.id = task.project_id
-               AND task.user_id = ?',
-            [$user_id]);
+function get_tasks ($link, $user_id, $is_show) {
+    $pr_id = $_GET['pr_id'] ?? null;
+    $project_param = $pr_id ? ' AND task.project_id = ? ' : '';
+    $show_param = $is_show ? '' : ' AND task.state = 0 ';
+    $tasks = db_fetch_data($link,
+        'SELECT *, task.name AS task_name, project.name AS project_name 
+          FROM task JOIN project
+         WHERE project.id = task.project_id' . $project_param . $show_param . '
+           AND task.user_id = ?
+      ORDER BY task.deadline',
+        [$pr_id, $user_id]);
+
+    if (isset($pr_id) && !sizeof($tasks)) {
+        http_response_code(404);
+        die();
     }
+
     return $tasks;
 }
+
+
+
