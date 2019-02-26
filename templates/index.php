@@ -34,7 +34,7 @@
             </td>
 
             <td class="task__file">
-                <a class="download-link" href="#">Home.psd</a>
+                <a class="download-link" href="#"><?=$item['file'] ?></a>
             </td>
 
             <td class="task__date"><?=date("d.m.Y", strtotime($item['deadline'])); ?></td>

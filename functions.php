@@ -54,6 +54,19 @@ function db_fetch_data ($link, $sql, $query_data = []) {
     return $result_data;
 }
 
+
+// Безопасная запись данных в БД MySQL (с помощью подготовленных выражений)
+function db_insert_data ($link, $sql, $data = []) {
+    $stmt = db_get_prepare_stmt($link, $sql, $data);
+    $result = mysqli_stmt_execute($stmt);
+
+    if ($result) {
+        $result = mysqli_insert_id($link);
+    }
+
+    return $result;
+}
+
 function is_correct_project_id ($link, $user_id, $pr_id) {
     $sql = 'SELECT id, user_id
               FROM project
@@ -96,5 +109,15 @@ function get_tasks ($link, $user_id, $pr_id, $is_show) {
     return db_fetch_data($link, $sql, $data);
 }
 
+function add_new_task ($link, $user_id, $pr_id, $task_name, $file_path, $deadline) {
+    $sql = "INSERT INTO task (date_create, date_done, state, name, file, deadline, user_id, project_id)
+              VALUES (NOW(), NULL, 0, ?, ?, ?, ?, ?)";
+    $res = db_insert_data($link, $sql, [$task_name, $file_path, $deadline, $user_id, $pr_id]);
 
-
+    if($res) {
+        header("Location: index.php");
+    }
+    else {
+        print("Ошибка при записи в базу данных");
+    }
+}
