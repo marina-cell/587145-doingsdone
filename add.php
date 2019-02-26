@@ -18,6 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
+    if (!empty($new_task['date']) && !check_date_format($new_task['date'])) {
+        $errors['date'] = 'Дата должна быть в формате ДД.ММ.ГГГГ';
+    }
+
     if (!empty($new_task['date']) && $new_task['date'] < date("d.m.Y", time())) {
         $errors['date'] = 'Дата должна быть больше или равна текущей';
     }
