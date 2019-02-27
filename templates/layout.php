@@ -42,6 +42,10 @@
 
                 <nav class="main-navigation">
                     <ul class="main-navigation__list">
+                        <li class="main-navigation__list-item">
+                            <a class="main-navigation__list-item-link" href="index.php?pr_id=inbox">Входящие</a>
+                            <span class="main-navigation__list-item-count"><?=$inbox_tasks_count;?></span>
+                        </li>
                         <?php foreach ($projects as $project): ?>
                             <li class="main-navigation__list-item">
                                 <a class="main-navigation__list-item-link" href=<?php print("index.php?pr_id=" . $project['id']);?>>

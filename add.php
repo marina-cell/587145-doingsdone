@@ -3,6 +3,7 @@
 require_once('init.php');
 
 $projects = get_projects($link, $cur_user_id);
+$inbox_tasks_count = get_inbox_tasks_count($link, $cur_user_id);
 
 // Валидация формы
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -20,11 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (!empty($new_task['date']) && !check_date_format($new_task['date'])) {
         $errors['date'] = 'Дата должна быть в формате ДД.ММ.ГГГГ';
-    } else if (!empty($new_task['date']) && $new_task['date'] < date("d.m.Y", time())) {
+    } else if (!empty($new_task['date']) && strtotime($new_task['date']) < time()) {
         $errors['date'] = 'Машину времени еще не изобрели';
     }
 
-    if(!is_correct_project_id($link, $cur_user_id, $new_task['project'])) {
+    if(!empty($new_task['project']) && !is_correct_project_id($link, $cur_user_id, $new_task['project'])) {
         $errors['project'] = 'Такого проекта не существует';
     }
 
@@ -40,7 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     else {
         $deadline_date = date("Y.m.d", strtotime($new_task['date']) ?? "");
-        add_new_task($link, $cur_user_id,  $new_task['project'], $new_task['name'], $new_task['path'], $deadline_date);
+        $new_task['project'] = $new_task['project'] ? $new_task['project'] : "0";
+        add_new_task($link, $cur_user_id, $new_task['project'] ?? "0", $new_task['name'], $new_task['path'], $deadline_date);
         $page_content = "";
     }
 }
@@ -53,7 +55,8 @@ else {
 $layout_content = include_template('layout.php', [
     'content' => $page_content,
     'title' => 'Добавление задачи',
-    'projects' => $projects
+    'projects' => $projects,
+    'inbox_tasks_count' => $inbox_tasks_count
 ]);
 
 print($layout_content);

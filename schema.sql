@@ -13,7 +13,7 @@ CREATE TABLE task (
                     date_done DATETIME,
                     state TINYINT DEFAULT 0,
                     name CHAR(128),
-                    file CHAR,
+                    file CHAR(128),
                     deadline DATETIME,
                     user_id INT UNSIGNED,
                     project_id INT UNSIGNED
@@ -25,6 +25,6 @@ CREATE TABLE user (
                     name CHAR(128),
                     password CHAR(64)
 );
-CREATE UNIQUE INDEX p ON project(name);
+CREATE INDEX p ON project(name);
 CREATE UNIQUE INDEX u ON user(name);
 CREATE INDEX t ON task(name);
