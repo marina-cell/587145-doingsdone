@@ -54,13 +54,27 @@ function db_fetch_data ($link, $sql, $query_data = []) {
     return $result_data;
 }
 
+
+// Безопасная запись данных в БД MySQL (с помощью подготовленных выражений)
+function db_insert_data ($link, $sql, $data = []) {
+    $stmt = db_get_prepare_stmt($link, $sql, $data);
+    $result = mysqli_stmt_execute($stmt);
+
+    if ($result) {
+        $result = mysqli_insert_id($link);
+    }
+
+    return $result;
+}
+
 function is_correct_project_id ($link, $user_id, $pr_id) {
     $sql = 'SELECT id, user_id
               FROM project
              WHERE id = ?
                AND user_id = ?;';
+    $res = ($pr_id == 'inbox') ? true : sizeof(db_fetch_data($link, $sql, [$pr_id, $user_id]));
 
-    return sizeof(db_fetch_data($link, $sql, [$pr_id, $user_id]));
+    return $res;
 }
 
 function get_projects ($link, $user_id) {
@@ -68,10 +82,21 @@ function get_projects ($link, $user_id) {
               FROM task t JOIN project p
                 ON t.project_id  = p.id
              WHERE t.user_id = ?
-          GROUP BY t.project_id 
+               AND t.state = 0
+          GROUP BY t.project_id
           ORDER BY p.name;';
 
     return db_fetch_data($link, $sql, [$user_id]);
+}
+
+function get_inbox_tasks_count ($link, $user_id) {
+    $sql = 'SELECT COUNT(t.name) AS tasks_count
+              FROM task t
+             WHERE t.user_id = ?
+               AND t.project_id = 0';
+
+    $array = db_fetch_data($link, $sql, [$user_id]);
+    return $array[0]['tasks_count'];
 }
 
 function get_tasks ($link, $user_id, $pr_id, $is_show) {
@@ -79,22 +104,45 @@ function get_tasks ($link, $user_id, $pr_id, $is_show) {
 
     $additional_conditions = ' ';
     if($pr_id) {
-        $additional_conditions .= ' AND task.project_id = ? '; // если задан ID проекта
+        $additional_conditions .= ' AND t.project_id = ? '; // если задан ID проекта
         $data[] = $pr_id;
     }
     if(!$is_show) {
-        $additional_conditions .= ' AND task.state = 0 ';     // если нужно скрыть завершенные задачи (state = 1)
+        $additional_conditions .= ' AND t.state = 0 ';     // если нужно скрыть завершенные задачи (state = 1)
     }
 
-    $sql = 'SELECT *, task.name AS task_name, project.name AS project_name 
-              FROM task JOIN project
-             WHERE project.id = task.project_id
-               AND task.user_id = ?
+    $sql = 'SELECT t.name AS task_name, t.state, t.deadline, t.file 
+              FROM task t
+             WHERE t.user_id = ?
                    ' . $additional_conditions . '
-          ORDER BY task.deadline';
+          ORDER BY t.deadline';
 
     return db_fetch_data($link, $sql, $data);
 }
 
+function add_new_task ($link, $user_id, $pr_id, $task_name, $file_path, $deadline) {
+    $sql = 'INSERT INTO task (date_create, date_done, state, name, file, deadline, user_id, project_id)
+              VALUES (NOW(), NULL, 0, ?, ?, ?, ?, ?)';
+    $res = db_insert_data($link, $sql, [$task_name, $file_path, $deadline, $user_id, $pr_id]);
 
+    if($res) {
+        header("Location: index.php");
+    }
+    else {
+        print("Ошибка при записи в базу данных");
+    }
+}
 
+/**
+ * Проверяет, что переданная дата соответствует формату ДД.ММ.ГГГГ
+ * @param string $date строка с датой
+ * @return bool
+ */
+function check_date_format($date) {
+    $result = false;
+    $regexp = '/(\d{2})\.(\d{2})\.(\d{4})/m';
+    if (preg_match($regexp, $date, $parts) && count($parts) == 4) {
+        $result = checkdate($parts[2], $parts[1], $parts[3]);
+    }
+    return $result;
+}

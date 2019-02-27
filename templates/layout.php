@@ -20,7 +20,7 @@
             </a>
 
             <div class="main-header__side">
-                <a class="main-header__side-item button button--plus open-modal" href="pages/form-task.html">Добавить задачу</a>
+                <a class="main-header__side-item button button--plus open-modal" href="add.php">Добавить задачу</a>
 
                 <div class="main-header__side-item user-menu">
                     <div class="user-menu__image">
@@ -42,6 +42,10 @@
 
                 <nav class="main-navigation">
                     <ul class="main-navigation__list">
+                        <li class="main-navigation__list-item">
+                            <a class="main-navigation__list-item-link" href="index.php?pr_id=inbox">Входящие</a>
+                            <span class="main-navigation__list-item-count"><?=$inbox_tasks_count;?></span>
+                        </li>
                         <?php foreach ($projects as $project): ?>
                             <li class="main-navigation__list-item">
                                 <a class="main-navigation__list-item-link" href=<?php print("index.php?pr_id=" . $project['id']);?>>
@@ -70,7 +74,7 @@
             <p>Веб-приложение для удобного ведения списка дел.</p>
         </div>
 
-        <a class="main-footer__button button button--plus" href="pages/form-task.html">Добавить задачу</a>
+        <a class="main-footer__button button button--plus" href="add.php">Добавить задачу</a>
 
         <div class="main-footer__social social">
             <span class="visually-hidden">Мы в соцсетях:</span>
