@@ -26,5 +26,5 @@ CREATE TABLE user (
                     password CHAR(64)
 );
 CREATE INDEX p ON project(name);
-CREATE UNIQUE INDEX u ON user(name);
+CREATE INDEX u ON user(name);
 CREATE INDEX t ON task(name);

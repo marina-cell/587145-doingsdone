@@ -34,13 +34,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (count($errors)) {
-        $page_content = include_template('add.php', ['projects' => $projects, 'new_task' => $new_task, 'errors' => $errors]);
+        $page_content = include_template('add.php', [
+            'projects' => $projects,
+            'new_task' => $new_task,
+            'errors' => $errors
+        ]);
     }
     else {
         $deadline_date = date("Y.m.d", strtotime($new_task['date']) ?? "");
         $new_task['project'] = $new_task['project'] ? $new_task['project'] : "0";
         add_new_task($link, $cur_user_id, $new_task['project'] ?? "0", $new_task['name'], $new_task['path'], $deadline_date);
-        $page_content = "";
+        exit();
     }
 }
 else {

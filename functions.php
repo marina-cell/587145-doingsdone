@@ -143,6 +143,28 @@ function add_new_task ($link, $user_id, $pr_id, $task_name, $file_path, $deadlin
     }
 }
 
+function is_email_exists ($link, $email) {
+    $sql = 'SELECT id
+              FROM user
+             WHERE email = ?';
+    $res = db_fetch_data($link, $sql, [$email]);
+
+    return !empty($res);
+}
+
+function add_new_user ($link, $email, $name, $password) {
+    $sql = 'INSERT INTO user (date_regist, email, name, password)
+              VALUES (NOW(), ?, ?, ?)';
+    $res = db_insert_data($link, $sql, [$email, $name, $password]);
+
+    if($res) {
+        header("Location: index.php");
+    }
+    else {
+        print("Ошибка при записи в базу данных");
+    }
+}
+
 /**
  * Проверяет, что переданная дата соответствует формату ДД.ММ.ГГГГ
  * @param string $date строка с датой
