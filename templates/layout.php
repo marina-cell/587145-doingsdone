@@ -42,16 +42,16 @@
 
                 <nav class="main-navigation">
                     <ul class="main-navigation__list">
-                        <li class="main-navigation__list-item <?php if ($_GET['pr_id'] == ''): ?>main-navigation__list-item--active<?php endif; ?>">
+                        <li class="main-navigation__list-item <?php if ($pr_id == ''): ?>main-navigation__list-item--active<?php endif; ?>">
                             <a class="main-navigation__list-item-link" href="index.php">Все</a>
                             <span class="main-navigation__list-item-count"><?=$all_tasks_count;?></span>
                         </li>
-                        <li class="main-navigation__list-item <?php if ($_GET['pr_id'] == 'inbox'): ?>main-navigation__list-item--active<?php endif; ?>">
+                        <li class="main-navigation__list-item <?php if ($pr_id == 'inbox'): ?>main-navigation__list-item--active<?php endif; ?>">
                             <a class="main-navigation__list-item-link" href="index.php?pr_id=inbox">Входящие</a>
                             <span class="main-navigation__list-item-count"><?=$inbox_tasks_count;?></span>
                         </li>
                         <?php foreach ($projects as $project): ?>
-                            <li class="main-navigation__list-item  <?php if ($_GET['pr_id'] == $project['id']): ?>main-navigation__list-item--active<?php endif; ?>">
+                            <li class="main-navigation__list-item  <?php if ($pr_id == $project['id']): ?>main-navigation__list-item--active<?php endif; ?>">
                                 <a class="main-navigation__list-item-link" href=<?php print("index.php?pr_id=" . $project['id']);?>>
                                     <?=htmlspecialchars($project['name']); ?>
                                 </a>

@@ -46,7 +46,7 @@
 
         <label class="form__label" for="name">Имя <sup>*</sup></label>
 
-        <input class="form__input <?=$classname_email;?>" type="text" name="name" id="name" value="<?=$value_name;?>" placeholder="Введите имя">
+        <input class="form__input <?=$classname_name;?>" type="text" name="name" id="name" value="<?=$value_name;?>" placeholder="Введите имя">
 
         <?php if (isset($errors['name'])): ?>
             <p class="form__message">

@@ -2,6 +2,18 @@
 
 require_once('init.php');
 
+// Запросы данных из SQL
+$projects = get_projects($link, $cur_user_id);
+$all_tasks_count = get_tasks_count($link, $cur_user_id);
+$inbox_tasks_count = get_tasks_count($link, $cur_user_id, "\0");
+
+// Проверка GET-параметра на наличие в БД
+$pr_id = $_GET['pr_id'] ?? null;
+if ($pr_id && !is_correct_project_id($link, $cur_user_id, $pr_id)) {
+    http_response_code(404);
+    die();
+}
+
 $tpl_data = [];
 
 // Валидация формы
@@ -42,6 +54,7 @@ $layout_content = include_template('layout.php', [
     'content' => $page_content,
     'title' => 'Регистрация аккаунта',
     'projects' => $projects,
+    'pr_id' => $pr_id,
     'all_tasks_count' => $all_tasks_count,
     'inbox_tasks_count' => $inbox_tasks_count
 ]);
