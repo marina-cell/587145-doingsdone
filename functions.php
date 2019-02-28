@@ -89,20 +89,10 @@ function get_projects ($link, $user_id) {
     return db_fetch_data($link, $sql, [$user_id]);
 }
 
-function get_inbox_tasks_count ($link, $user_id) {
-    $sql = 'SELECT COUNT(t.name) AS tasks_count
-              FROM task t
-             WHERE t.user_id = ?
-               AND t.project_id = 0';
-
-    $array = db_fetch_data($link, $sql, [$user_id]);
-    return $array[0]['tasks_count'];
-}
-
-function get_tasks ($link, $user_id, $pr_id, $is_show) {
+function get_tasks ($link, $user_id, $pr_id = null, $is_show) {
     $data = [$user_id];
-
     $additional_conditions = ' ';
+
     if($pr_id) {
         $additional_conditions .= ' AND t.project_id = ? '; // если задан ID проекта
         $data[] = $pr_id;
@@ -118,6 +108,26 @@ function get_tasks ($link, $user_id, $pr_id, $is_show) {
           ORDER BY t.deadline';
 
     return db_fetch_data($link, $sql, $data);
+}
+
+function get_tasks_count ($link, $user_id, $pr_id = null) {
+    $data = [$user_id];
+    $additional_conditions = ' ';
+
+    if($pr_id) {
+        $additional_conditions .= ' AND t.project_id = ? '; // если задан ID проекта
+        $data[] = $pr_id;
+    }
+
+    $sql = 'SELECT COUNT(t.name) AS tasks_count
+              FROM task t
+             WHERE t.user_id = ?
+               AND t.state = 0
+                   ' . $additional_conditions;
+
+    $array = db_fetch_data($link, $sql, $data);
+
+    return $array[0]['tasks_count'];
 }
 
 function add_new_task ($link, $user_id, $pr_id, $task_name, $file_path, $deadline) {

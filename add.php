@@ -2,9 +2,6 @@
 
 require_once('init.php');
 
-$projects = get_projects($link, $cur_user_id);
-$inbox_tasks_count = get_inbox_tasks_count($link, $cur_user_id);
-
 // Валидация формы
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $new_task = $_POST;
@@ -21,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (!empty($new_task['date']) && !check_date_format($new_task['date'])) {
         $errors['date'] = 'Дата должна быть в формате ДД.ММ.ГГГГ';
-    } else if (!empty($new_task['date']) && strtotime($new_task['date']) < time()) {
+    } else if (!empty($new_task['date']) && (strtotime($new_task['date']) + 86400) < time()) {
         $errors['date'] = 'Машину времени еще не изобрели';
     }
 
@@ -56,6 +53,7 @@ $layout_content = include_template('layout.php', [
     'content' => $page_content,
     'title' => 'Добавление задачи',
     'projects' => $projects,
+    'all_tasks_count' => $all_tasks_count,
     'inbox_tasks_count' => $inbox_tasks_count
 ]);
 
