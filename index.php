@@ -4,7 +4,8 @@ require_once('init.php');
 
 // Запросы данных из SQL
 $projects = get_projects($link, $cur_user_id);
-$inbox_tasks_count = get_inbox_tasks_count($link, $cur_user_id);
+$all_tasks_count = get_tasks_count($link, $cur_user_id);
+$inbox_tasks_count = get_tasks_count($link, $cur_user_id, "\0");
 
 // Проверка GET-параметра на наличие в БД
 $pr_id = $_GET['pr_id'] ?? null;
@@ -25,6 +26,8 @@ $layout_content = include_template('layout.php', [
     'content' => $page_content,
     'title' => 'Дела в порядке',
     'projects' => $projects,
+    'pr_id' => $pr_id,
+    'all_tasks_count' => $all_tasks_count,
     'inbox_tasks_count' => $inbox_tasks_count
 ]);
 

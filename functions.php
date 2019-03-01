@@ -89,20 +89,10 @@ function get_projects ($link, $user_id) {
     return db_fetch_data($link, $sql, [$user_id]);
 }
 
-function get_inbox_tasks_count ($link, $user_id) {
-    $sql = 'SELECT COUNT(t.name) AS tasks_count
-              FROM task t
-             WHERE t.user_id = ?
-               AND t.project_id = 0';
-
-    $array = db_fetch_data($link, $sql, [$user_id]);
-    return $array[0]['tasks_count'];
-}
-
-function get_tasks ($link, $user_id, $pr_id, $is_show) {
+function get_tasks ($link, $user_id, $pr_id = null, $is_show) {
     $data = [$user_id];
-
     $additional_conditions = ' ';
+
     if($pr_id) {
         $additional_conditions .= ' AND t.project_id = ? '; // если задан ID проекта
         $data[] = $pr_id;
@@ -120,10 +110,52 @@ function get_tasks ($link, $user_id, $pr_id, $is_show) {
     return db_fetch_data($link, $sql, $data);
 }
 
+function get_tasks_count ($link, $user_id, $pr_id = null) {
+    $data = [$user_id];
+    $additional_conditions = ' ';
+
+    if($pr_id) {
+        $additional_conditions .= ' AND t.project_id = ? '; // если задан ID проекта
+        $data[] = $pr_id;
+    }
+
+    $sql = 'SELECT COUNT(t.name) AS tasks_count
+              FROM task t
+             WHERE t.user_id = ?
+               AND t.state = 0
+                   ' . $additional_conditions;
+
+    $array = db_fetch_data($link, $sql, $data);
+
+    return $array[0]['tasks_count'];
+}
+
 function add_new_task ($link, $user_id, $pr_id, $task_name, $file_path, $deadline) {
     $sql = 'INSERT INTO task (date_create, date_done, state, name, file, deadline, user_id, project_id)
               VALUES (NOW(), NULL, 0, ?, ?, ?, ?, ?)';
     $res = db_insert_data($link, $sql, [$task_name, $file_path, $deadline, $user_id, $pr_id]);
+
+    if($res) {
+        header("Location: index.php");
+    }
+    else {
+        print("Ошибка при записи в базу данных");
+    }
+}
+
+function is_email_exists ($link, $email) {
+    $sql = 'SELECT id
+              FROM user
+             WHERE email = ?';
+    $res = db_fetch_data($link, $sql, [$email]);
+
+    return !empty($res);
+}
+
+function add_new_user ($link, $email, $name, $password) {
+    $sql = 'INSERT INTO user (date_regist, email, name, password)
+              VALUES (NOW(), ?, ?, ?)';
+    $res = db_insert_data($link, $sql, [$email, $name, $password]);
 
     if($res) {
         header("Location: index.php");
