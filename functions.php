@@ -143,13 +143,12 @@ function add_new_task ($link, $user_id, $pr_id, $task_name, $file_path, $deadlin
     }
 }
 
-function is_email_exists ($link, $email) {
-    $sql = 'SELECT id
+function get_user ($link, $email) {
+    $sql = 'SELECT *
               FROM user
              WHERE email = ?';
-    $res = db_fetch_data($link, $sql, [$email]);
 
-    return !empty($res);
+    return db_fetch_data($link, $sql, [$email]);
 }
 
 function add_new_user ($link, $email, $name, $password) {

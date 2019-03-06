@@ -2,6 +2,14 @@
 
 require_once('init.php');
 
+if (!isset($_SESSION['user'])) {
+    header("Location: index.php");
+    exit();
+}
+
+session_start();
+$cur_user_id = $_SESSION['user']['id'] ?? 0;
+
 // Запросы данных из SQL
 $projects = get_projects($link, $cur_user_id);
 $all_tasks_count = get_tasks_count($link, $cur_user_id);
