@@ -2,13 +2,14 @@
 
 require_once('init.php');
 
+session_start();
+
 // Валидация формы
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $form_user = $_POST;
 
     $required_fields = ['email', 'password'];
     $errors = [];
-    session_start();
 
     foreach ($required_fields as $key) {
         if (empty($form_user[$key])) {

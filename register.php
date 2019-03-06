@@ -3,7 +3,7 @@
 require_once('init.php');
 
 session_start();
-$_SESSION = [];
+
 $tpl_data = [];
 
 // Валидация формы

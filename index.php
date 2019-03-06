@@ -3,6 +3,12 @@
 require_once('init.php');
 
 session_start();
+
+if (!isset($_SESSION['user'])) {
+    header("Location: guest.php");
+    exit();
+}
+
 $cur_user_id = $_SESSION['user']['id'] ?? 0;
 
 // Запросы данных из SQL

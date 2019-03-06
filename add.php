@@ -2,12 +2,13 @@
 
 require_once('init.php');
 
+session_start();
+
 if (!isset($_SESSION['user'])) {
     header("Location: index.php");
     exit();
 }
 
-session_start();
 $cur_user_id = $_SESSION['user']['id'] ?? 0;
 
 // Запросы данных из SQL
