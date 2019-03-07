@@ -9,7 +9,7 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
-$cur_user_id = $_SESSION['user']['id'] ?? 0;
+$cur_user_id = $_SESSION['user']['id'];
 
 // Запросы данных из SQL
 $projects = get_projects($link, $cur_user_id);

@@ -28,6 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($user) {
             if (password_verify($form_user['password'], $user['password'])) {
                 $_SESSION['user'] = $user;
+                header("Location: index.php");
+                exit();
             }
             else {
                 $errors['password_invalid'] = 'Неверный пароль';
@@ -37,25 +39,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $errors['email_invalid'] = 'Такой пользователь не найден';
         }
     }
+}
+elseif (isset($_SESSION['user'])) {
+    header("Location: index.php");
+    exit();
+}
 
-    if (count($errors)) {
-        $_SESSION = [];
-        $page_content = include_template('auth.php', ['user' => $form_user ?? null, 'errors' => $errors]);
-    }
-    else {
-        header("Location: index.php");
-        exit();
-    }
-}
-else {
-    if (isset($_SESSION['user'])) {
-        header("Location: index.php");
-        exit();
-    }
-    else {
-        $page_content = include_template('auth.php', ['user' => $form_user ?? null]);
-    }
-}
+$page_content = include_template('auth.php', ['user' => $form_user ?? null, 'errors' => $errors ?? null]);
 
 $layout_content = include_template('layout.php', [
     'content' => $page_content,
