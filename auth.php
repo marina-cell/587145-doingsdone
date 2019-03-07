@@ -28,8 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($user) {
             if (password_verify($form_user['password'], $user['password'])) {
                 $_SESSION['user'] = $user;
-                header("Location: index.php");
-                exit();
             }
             else {
                 $errors['password_invalid'] = 'Неверный пароль';
@@ -40,7 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
-elseif (isset($_SESSION['user'])) {
+
+if (isset($_SESSION['user'])) {
     header("Location: index.php");
     exit();
 }
