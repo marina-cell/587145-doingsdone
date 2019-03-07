@@ -28,13 +28,13 @@
                                     <?php if (is_date_important($item['deadline'])): ?>task--important<?php endif; ?>">
             <td class="task__select">
                 <label class="checkbox task__checkbox">
-                    <input class="checkbox__input visually-hidden task__checkbox" type="checkbox" value="1" <?php if ($item['state']): ?>checked<?php endif; ?>>
+                    <input class="checkbox__input visually-hidden task__checkbox" type="checkbox" value="<?=$item['id']; ?>" <?php if ($item['state']): ?>checked<?php endif; ?>>
                     <span class="checkbox__text"><?=htmlspecialchars($item['task_name']); ?></span>
                 </label>
             </td>
 
             <td class="task__file">
-                <a class="download-link" href="#"><?=$item['file'] ?></a>
+                <a class="download-link" href="#"><?=$item['file']; ?></a>
             </td>
 
             <td class="task__date"><?=date("d.m.Y", strtotime($item['deadline'])); ?></td>

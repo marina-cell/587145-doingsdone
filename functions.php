@@ -101,7 +101,7 @@ function get_tasks ($link, $user_id, $pr_id = null, $is_show) {
         $additional_conditions .= ' AND t.state = 0 ';     // если нужно скрыть завершенные задачи (state = 1)
     }
 
-    $sql = 'SELECT t.name AS task_name, t.state, t.deadline, t.file 
+    $sql = 'SELECT t.id, t.name AS task_name, t.state, t.deadline, t.file 
               FROM task t
              WHERE t.user_id = ?
                    ' . $additional_conditions . '
@@ -136,6 +136,21 @@ function add_new_task ($link, $user_id, $pr_id, $task_name, $file_path, $deadlin
     $res = db_insert_data($link, $sql, [$task_name, $file_path, $deadline, $user_id, $pr_id]);
 
     if($res) {
+        header("Location: index.php");
+    }
+    else {
+        print("Ошибка при записи в базу данных");
+    }
+}
+
+function update_task_state ($link, $task_id, $task_state) {
+    $sql = 'SELECT id
+              FROM task
+             WHERE id = ?;';
+
+    if (sizeof(db_fetch_data($link, $sql, [$task_id]))) {
+        $sql = 'UPDATE task SET state = ?, date_done = NOW() WHERE id = ?';
+        db_insert_data($link, $sql, [$task_state, $task_id]);
         header("Location: index.php");
     }
     else {
