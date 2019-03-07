@@ -42,7 +42,9 @@
         <?php endif; ?>
     </div>
 
-    <?php if (isset($errors)): ?>
+    <?php if (isset($errors['email_invalid']) OR isset($errors['password_invalid'])): ?>
+        <p class="error-message">Вы ввели неверный email/пароль</p>
+    <?php elseif (isset($errors)): ?>
         <p class="error-message">Пожалуйста, исправьте ошибки в форме</p>
     <?php endif; ?>
 
