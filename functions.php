@@ -169,9 +169,9 @@ function add_new_task ($link, $user_id, $pr_id, $task_name, $file_path, $deadlin
     }
 }
 
-function update_task_state ($link, $task_id, $task_state) {
-    $sql = 'UPDATE task SET state = ?, date_done = NOW() WHERE id = ?';
-    db_insert_data($link, $sql, [$task_state, $task_id]);
+function update_task_state ($link, $user_id, $task_id, $task_state) {
+    $sql = 'UPDATE task SET state = ?, date_done = NOW() WHERE id = ? AND user_id = ?';
+    db_insert_data($link, $sql, [$task_state, $task_id, $user_id]);
     header("Location: index.php");
 }
 

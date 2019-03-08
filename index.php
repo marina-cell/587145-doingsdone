@@ -30,7 +30,7 @@ $show_complete_tasks = $_GET['show_completed'] ?? null;
 $task_id = $_GET['task_id'] ?? null;
 $task_state = $_GET['check'] ?? null;
 if ($task_id) {
-    update_task_state($link, $task_id, $task_state);
+    update_task_state($link, $cur_user_id, $task_id, $task_state);
 }
 
 $task_list = get_tasks($link, $cur_user_id, $pr_id, $show_complete_tasks);
