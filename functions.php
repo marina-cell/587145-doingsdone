@@ -115,7 +115,7 @@ function is_exist_project_name ($link, $user_id, $name) {
     return sizeof(db_fetch_data($link, $sql, [$name, $user_id]));
 }
 
-function get_tasks ($link, $user_id, $pr_id = null, $is_show) {
+function get_tasks ($link, $user_id, $pr_id, $is_show, $deadline) {
     $data = [$user_id];
     $additional_conditions = ' ';
 
@@ -124,7 +124,18 @@ function get_tasks ($link, $user_id, $pr_id = null, $is_show) {
         $data[] = $pr_id;
     }
     if(!$is_show) {
-        $additional_conditions .= ' AND t.state = 0 ';     // если нужно скрыть завершенные задачи (state = 1)
+        $additional_conditions .= ' AND t.state = 0 ';      // если нужно скрыть завершенные задачи (state = 1)
+    }
+    switch ($deadline) {                                    // фильтр задач по сроку выполнения
+        case 'agenda':
+            $additional_conditions .= ' AND t.deadline = CURDATE() ';
+            break;
+        case 'tomorrow':
+            $additional_conditions .= ' AND t.deadline <= (CURDATE()+1) AND t.deadline > CURDATE() ';
+            break;
+        case 'overdue':
+            $additional_conditions .= ' AND t.deadline < CURDATE() ';
+            break;
     }
 
     $sql = 'SELECT t.id, t.name AS task_name, t.state, t.deadline, t.file 
