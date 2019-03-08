@@ -2,6 +2,15 @@
 
 require_once('init.php');
 
+session_start();
+
+if (!isset($_SESSION['user'])) {
+    header("Location: index.php");
+    exit();
+}
+
+$cur_user_id = $_SESSION['user']['id'];
+
 // Запросы данных из SQL
 $projects = get_projects($link, $cur_user_id);
 $all_tasks_count = get_tasks_count($link, $cur_user_id);
@@ -11,7 +20,7 @@ $inbox_tasks_count = get_tasks_count($link, $cur_user_id, "\0");
 $pr_id = $_GET['pr_id'] ?? null;
 if ($pr_id && !is_correct_project_id($link, $cur_user_id, $pr_id)) {
     http_response_code(404);
-    die();
+    exit();
 }
 
 // Валидация формы
@@ -23,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $errors = [];
 
     foreach ($required as $key) {
-        if (empty($_POST[$key])) {
+        if (empty($new_task[$key])) {
             $errors[$key] = 'Это поле надо заполнить';
         }
     }
@@ -45,25 +54,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $new_task['path'] = $path;
     }
 
-    if (count($errors)) {
-        $page_content = include_template('add.php', [
-            'projects' => $projects,
-            'new_task' => $new_task,
-            'errors' => $errors
-        ]);
-    }
-    else {
+    if (!count($errors)) {
         $deadline_date = date("Y.m.d", strtotime($new_task['date']) ?? "");
         $new_task['project'] = $new_task['project'] ? $new_task['project'] : "0";
         add_new_task($link, $cur_user_id, $new_task['project'] ?? "0", $new_task['name'], $new_task['path'], $deadline_date);
         exit();
     }
 }
-else {
-    $page_content = include_template('add.php', [
-        'projects' => $projects
-    ]);
-}
+
+$page_content = include_template('add.php', [
+    'projects' => $projects,
+    'new_task' => $new_task ?? null,
+    'errors' => $errors ?? null
+]);
 
 $layout_content = include_template('layout.php', [
     'content' => $page_content,

@@ -8,8 +8,3 @@ $db = [
     'database' => 'doingsdone'
 ];
 
-// показывать или нет выполненные задачи
-$show_complete_tasks = rand(0, 1);
-
-// Временно: ID текущего пользователя
-$cur_user_id = 1;

@@ -67,6 +67,35 @@ function db_insert_data ($link, $sql, $data = []) {
     return $result;
 }
 
+function get_projects ($link, $user_id) {
+    $sql = 'SELECT id, name
+              FROM project
+             WHERE user_id = ?
+          GROUP BY id
+          ORDER BY name;';
+
+    $projects = db_fetch_data($link, $sql, [$user_id]);
+
+    foreach ($projects as $item => &$project) {
+        $project['tasks_count'] = get_tasks_count($link, $user_id, $project['id']);
+    }
+
+    return $projects;
+}
+
+function add_new_project ($link, $name, $user_id) {
+    $sql = 'INSERT INTO project (name, user_id)
+              VALUES (?, ?)';
+    $res = db_insert_data($link, $sql, [$name, $user_id]);
+
+    if($res) {
+        header("Location: index.php");
+    }
+    else {
+        print("Ошибка при записи в базу данных");
+    }
+}
+
 function is_correct_project_id ($link, $user_id, $pr_id) {
     $sql = 'SELECT id, user_id
               FROM project
@@ -77,16 +106,13 @@ function is_correct_project_id ($link, $user_id, $pr_id) {
     return $res;
 }
 
-function get_projects ($link, $user_id) {
-    $sql = 'SELECT p.id, p.name, COUNT(t.name) AS tasks_count
-              FROM task t JOIN project p
-                ON t.project_id  = p.id
-             WHERE t.user_id = ?
-               AND t.state = 0
-          GROUP BY t.project_id
-          ORDER BY p.name;';
+function is_exist_project_name ($link, $user_id, $name) {
+    $sql = 'SELECT name
+              FROM project
+             WHERE name = ?
+               AND user_id = ?;';
 
-    return db_fetch_data($link, $sql, [$user_id]);
+    return sizeof(db_fetch_data($link, $sql, [$name, $user_id]));
 }
 
 function get_tasks ($link, $user_id, $pr_id = null, $is_show) {
@@ -101,7 +127,7 @@ function get_tasks ($link, $user_id, $pr_id = null, $is_show) {
         $additional_conditions .= ' AND t.state = 0 ';     // если нужно скрыть завершенные задачи (state = 1)
     }
 
-    $sql = 'SELECT t.name AS task_name, t.state, t.deadline, t.file 
+    $sql = 'SELECT t.id, t.name AS task_name, t.state, t.deadline, t.file 
               FROM task t
              WHERE t.user_id = ?
                    ' . $additional_conditions . '
@@ -143,13 +169,18 @@ function add_new_task ($link, $user_id, $pr_id, $task_name, $file_path, $deadlin
     }
 }
 
-function is_email_exists ($link, $email) {
-    $sql = 'SELECT id
+function update_task_state ($link, $user_id, $task_id, $task_state) {
+    $sql = 'UPDATE task SET state = ?, date_done = NOW() WHERE id = ? AND user_id = ?';
+    db_insert_data($link, $sql, [$task_state, $task_id, $user_id]);
+    header("Location: index.php");
+}
+
+function get_user ($link, $email) {
+    $sql = 'SELECT *
               FROM user
              WHERE email = ?';
-    $res = db_fetch_data($link, $sql, [$email]);
 
-    return !empty($res);
+    return db_fetch_data($link, $sql, [$email]);
 }
 
 function add_new_user ($link, $email, $name, $password) {
