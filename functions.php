@@ -170,18 +170,9 @@ function add_new_task ($link, $user_id, $pr_id, $task_name, $file_path, $deadlin
 }
 
 function update_task_state ($link, $task_id, $task_state) {
-    $sql = 'SELECT id
-              FROM task
-             WHERE id = ?;';
-
-    if (sizeof(db_fetch_data($link, $sql, [$task_id]))) {
-        $sql = 'UPDATE task SET state = ?, date_done = NOW() WHERE id = ?';
-        db_insert_data($link, $sql, [$task_state, $task_id]);
-        header("Location: index.php");
-    }
-    else {
-        print("Ошибка при записи в базу данных");
-    }
+    $sql = 'UPDATE task SET state = ?, date_done = NOW() WHERE id = ?';
+    db_insert_data($link, $sql, [$task_state, $task_id]);
+    header("Location: index.php");
 }
 
 function get_user ($link, $email) {
