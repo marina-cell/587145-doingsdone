@@ -67,6 +67,35 @@ function db_insert_data ($link, $sql, $data = []) {
     return $result;
 }
 
+function get_projects ($link, $user_id) {
+    $sql = 'SELECT id, name
+              FROM project
+             WHERE user_id = ?
+          GROUP BY id
+          ORDER BY name;';
+
+    $projects = db_fetch_data($link, $sql, [$user_id]);
+
+    foreach ($projects as $item => &$project) {
+        $project['tasks_count'] = get_tasks_count($link, $user_id, $project['id']);
+    }
+
+    return $projects;
+}
+
+function add_new_project ($link, $name, $user_id) {
+    $sql = 'INSERT INTO project (name, user_id)
+              VALUES (?, ?)';
+    $res = db_insert_data($link, $sql, [$name, $user_id]);
+
+    if($res) {
+        header("Location: index.php");
+    }
+    else {
+        print("Ошибка при записи в базу данных");
+    }
+}
+
 function is_correct_project_id ($link, $user_id, $pr_id) {
     $sql = 'SELECT id, user_id
               FROM project
@@ -77,16 +106,13 @@ function is_correct_project_id ($link, $user_id, $pr_id) {
     return $res;
 }
 
-function get_projects ($link, $user_id) {
-    $sql = 'SELECT p.id, p.name, COUNT(t.name) AS tasks_count
-              FROM task t JOIN project p
-                ON t.project_id  = p.id
-             WHERE t.user_id = ?
-               AND t.state = 0
-          GROUP BY t.project_id
-          ORDER BY p.name;';
+function is_exist_project_name ($link, $user_id, $name) {
+    $sql = 'SELECT name
+              FROM project
+             WHERE name = ?
+               AND user_id = ?;';
 
-    return db_fetch_data($link, $sql, [$user_id]);
+    return sizeof(db_fetch_data($link, $sql, [$name, $user_id]));
 }
 
 function get_tasks ($link, $user_id, $pr_id = null, $is_show) {
