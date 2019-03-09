@@ -11,11 +11,6 @@ if (!isset($_SESSION['user'])) {
 
 $cur_user_id = $_SESSION['user']['id'];
 
-// Запросы данных из SQL
-$projects = get_projects($link, $cur_user_id);
-$all_tasks_count = get_tasks_count($link, $cur_user_id);
-$inbox_tasks_count = get_tasks_count($link, $cur_user_id, "\0");
-
 // Проверка GET-параметра на наличие в БД
 $pr_id = $_GET['pr_id'] ?? null;
 if ($pr_id && !is_correct_project_id($link, $cur_user_id, $pr_id)) {
@@ -50,6 +45,11 @@ $page_content = include_template('project.php', [
     'new_project' => $new_project ?? null,
     'errors' => $errors ?? null
 ]);
+
+// Запросы данных из SQL
+$projects = get_projects($link, $cur_user_id);
+$all_tasks_count = get_tasks_count($link, $cur_user_id);
+$inbox_tasks_count = get_tasks_count($link, $cur_user_id, "\0");
 
 $layout_content = include_template('layout.php', [
     'content' => $page_content,

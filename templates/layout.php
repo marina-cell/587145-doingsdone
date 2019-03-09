@@ -51,16 +51,16 @@
                     <nav class="main-navigation">
                         <ul class="main-navigation__list">
                             <li class="main-navigation__list-item <?php if ($pr_id == ''): ?>main-navigation__list-item--active<?php endif; ?>">
-                                <a class="main-navigation__list-item-link" href="index.php">Все</a>
+                                <a class="main-navigation__list-item-link" href="?<?= http_build_query(array_merge($_GET, ['pr_id' => ''])); ?>">Все</a>
                                 <span class="main-navigation__list-item-count"><?=$all_tasks_count;?></span>
                             </li>
                             <li class="main-navigation__list-item <?php if ($pr_id == 'inbox'): ?>main-navigation__list-item--active<?php endif; ?>">
-                                <a class="main-navigation__list-item-link" href="index.php?pr_id=inbox">Входящие</a>
+                                <a class="main-navigation__list-item-link" href="?<?= http_build_query(array_merge($_GET, ['pr_id' => 'inbox'])); ?>">Входящие</a>
                                 <span class="main-navigation__list-item-count"><?=$inbox_tasks_count;?></span>
                             </li>
                             <?php foreach ($projects as $project): ?>
                                 <li class="main-navigation__list-item  <?php if ($pr_id == $project['id']): ?>main-navigation__list-item--active<?php endif; ?>">
-                                    <a class="main-navigation__list-item-link" href=<?php print("index.php?pr_id=" . $project['id']);?>>
+                                    <a class="main-navigation__list-item-link" href="?<?= http_build_query(array_merge($_GET, ['pr_id' => $project['id']])); ?>">
                                         <?=htmlspecialchars($project['name']); ?>
                                     </a>
                                     <span class="main-navigation__list-item-count"><?=$project['tasks_count']; ?></span>
@@ -70,7 +70,7 @@
                     </nav>
 
                     <a class="button button--transparent button--plus content__side-button"
-                       href="project.php" target="project_add">Добавить проект</a>
+                       href="project.php">Добавить проект</a>
                 </section>
             <?php elseif (!isset($_SESSION['user']) && !isset($without_sidebar)): ?>
                 <section class="content__side">
