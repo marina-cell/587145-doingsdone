@@ -68,17 +68,12 @@ function db_insert_data ($link, $sql, $data = []) {
 }
 
 function get_projects ($link, $user_id) {
-    $sql = 'SELECT id, name
+    $sql = 'SELECT project.id, project.name, (SELECT COUNT(*) FROM task WHERE task.project_id = project.id AND task.state = 0) AS tasks_count
               FROM project
              WHERE user_id = ?
-          GROUP BY id
-          ORDER BY name;';
+          ORDER BY project.id;';
 
     $projects = db_fetch_data($link, $sql, [$user_id]);
-
-    foreach ($projects as $item => &$project) {
-        $project['tasks_count'] = get_tasks_count($link, $user_id, $project['id']);
-    }
 
     return $projects;
 }
@@ -115,7 +110,7 @@ function is_exist_project_name ($link, $user_id, $name) {
     return sizeof(db_fetch_data($link, $sql, [$name, $user_id]));
 }
 
-function get_tasks ($link, $user_id, $pr_id = null, $is_show) {
+function get_tasks ($link, $user_id, $pr_id, $is_show, $deadline) {
     $data = [$user_id];
     $additional_conditions = ' ';
 
@@ -124,7 +119,18 @@ function get_tasks ($link, $user_id, $pr_id = null, $is_show) {
         $data[] = $pr_id;
     }
     if(!$is_show) {
-        $additional_conditions .= ' AND t.state = 0 ';     // если нужно скрыть завершенные задачи (state = 1)
+        $additional_conditions .= ' AND t.state = 0 ';      // если нужно скрыть завершенные задачи (state = 1)
+    }
+    switch ($deadline) {                                    // фильтр задач по сроку выполнения
+        case 'agenda':
+            $additional_conditions .= ' AND t.deadline = CURDATE() ';
+            break;
+        case 'tomorrow':
+            $additional_conditions .= ' AND t.deadline <= (CURDATE()+1) AND t.deadline > CURDATE() ';
+            break;
+        case 'overdue':
+            $additional_conditions .= ' AND t.deadline < CURDATE() ';
+            break;
     }
 
     $sql = 'SELECT t.id, t.name AS task_name, t.state, t.deadline, t.file 
@@ -157,9 +163,16 @@ function get_tasks_count ($link, $user_id, $pr_id = null) {
 }
 
 function add_new_task ($link, $user_id, $pr_id, $task_name, $file_path, $deadline) {
-    $sql = 'INSERT INTO task (date_create, date_done, state, name, file, deadline, user_id, project_id)
+    if ($deadline) {
+        $sql = 'INSERT INTO task (date_create, date_done, state, name, file, user_id, project_id, deadline)
               VALUES (NOW(), NULL, 0, ?, ?, ?, ?, ?)';
-    $res = db_insert_data($link, $sql, [$task_name, $file_path, $deadline, $user_id, $pr_id]);
+        $res = db_insert_data($link, $sql, [$task_name, $file_path, $user_id, $pr_id, $deadline]);
+    }
+    else {
+        $sql = 'INSERT INTO task (date_create, date_done, state, name, file, deadline, user_id, project_id)
+              VALUES (NOW(), NULL, 0, ?, ?, NULL, ?, ?)';
+        $res = db_insert_data($link, $sql, [$task_name, $file_path, $user_id, $pr_id]);
+    }
 
     if($res) {
         header("Location: index.php");

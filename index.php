@@ -33,11 +33,14 @@ if ($task_id) {
     update_task_state($link, $cur_user_id, $task_id, $task_state);
 }
 
-$task_list = get_tasks($link, $cur_user_id, $pr_id, $show_complete_tasks);
+// Фильтр задач
+$task_filter = $_GET['filter'] ?? null;
+$task_list = get_tasks($link, $cur_user_id, $pr_id, $show_complete_tasks, $task_filter);
 
 // Шаблонизация
 $page_content = include_template('index.php', [
     'show_complete_tasks' => $show_complete_tasks,
+    'filter' => $task_filter,
     'task_list' => $task_list
 ]);
 
