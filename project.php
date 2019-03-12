@@ -5,7 +5,7 @@ require_once('init.php');
 session_start();
 
 if (!isset($_SESSION['user'])) {
-    header("Location: index.php");
+    http_response_code(403);
     exit();
 }
 
@@ -31,8 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    if (is_exist_project_name($link, $cur_user_id, $new_project['name'])) {
-        $errors['project'] = 'Такой проект уже существует';
+    if (isset($new_project['name'])) {
+        if (is_exist_project_name($link, $cur_user_id, $new_project['name'])) {
+            $errors['project'] = 'Такой проект уже существует';
+        }
     }
 
     if (!count($errors)) {

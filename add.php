@@ -5,7 +5,7 @@ require_once('init.php');
 session_start();
 
 if (!isset($_SESSION['user'])) {
-    header("Location: index.php");
+    http_response_code(403);
     exit();
 }
 
