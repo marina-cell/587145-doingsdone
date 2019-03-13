@@ -28,3 +28,4 @@ CREATE TABLE user (
 CREATE INDEX p ON project(name);
 CREATE INDEX u ON user(name);
 CREATE INDEX t ON task(name);
+CREATE FULLTEXT INDEX task_name ON task(name);
