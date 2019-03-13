@@ -19,8 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    if (!filter_var($form_user['email'], FILTER_VALIDATE_EMAIL)) {
-        $errors['email_format'] = 'Email должен быть корректным';
+    if (isset($form_user['email'])) {
+        if (!filter_var($form_user['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email_format'] = 'Email должен быть корректным';
+        }
     }
 
     if (empty($errors)) {
@@ -32,7 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             add_new_user($link, $form_user['email'], $form_user['name'], $password);
 
             $user = get_user($link, $form_user['email']);
-            $user = $user[0] ?? null;
             $_SESSION['user'] = $user;
             exit();
         }

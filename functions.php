@@ -2,7 +2,13 @@
 
 require_once('mysql_helper.php');
 
-// Шаблонизатор
+/**
+ * Шаблонизатор
+ * @param string    $name   Название шаблона
+ * @param array     $data   Данные для передачи в шаблон
+ *
+ * @return string|false     Контент
+ */
 function include_template($name, $data) {
     $name = 'templates/' . $name;
     $result = 'Ошибка: файл не найден';
@@ -20,7 +26,12 @@ function include_template($name, $data) {
     return $result;
 }
 
-// Проверка даты на приближение к дедлайну
+/**
+ * Проверяет, что переданная дата приближается к дедлайну
+ * @param string    $date   Дата дедлайна
+ *
+ * @return bool
+ */
 function is_date_important ($date) {
     $deadline_span = 86400; // секунд в 24 часах
     $is_deadline = false;
@@ -37,7 +48,14 @@ function is_date_important ($date) {
     return $is_deadline;
 }
 
-// Безопасное получение данных из БД MySQL (с помощью подготовленных выражений)
+/**
+ * Безопасное получение данных из БД MySQL (с помощью подготовленных выражений)
+ * @param  mysqli    $link          Ресурс соединения
+ * @param  string    $sql           SQL запрос с плейсхолдерами вместо значений
+ * @param  array     $query_data    Данные для вставки на место плейсхолдеров
+ *
+ * @return array
+ */
 function db_fetch_data ($link, $sql, $query_data = []) {
     $result_data = [];
 
@@ -55,7 +73,14 @@ function db_fetch_data ($link, $sql, $query_data = []) {
 }
 
 
-// Безопасная запись данных в БД MySQL (с помощью подготовленных выражений)
+/**
+ * Безопасная запись данных в БД MySQL (с помощью подготовленных выражений)
+ * @param  mysqli    $link   Ресурс соединения
+ * @param  string    $sql    SQL запрос с плейсхолдерами вместо значений
+ * @param  array     $data    Данные для вставки на место плейсхолдеров
+ *
+ * @return int|string|bool
+ */
 function db_insert_data ($link, $sql, $data = []) {
     $stmt = db_get_prepare_stmt($link, $sql, $data);
     $result = mysqli_stmt_execute($stmt);
@@ -67,6 +92,13 @@ function db_insert_data ($link, $sql, $data = []) {
     return $result;
 }
 
+/**
+ * Возвращает список проектов для указанного пользователя
+ * @param  mysqli    $link       Ресурс соединения
+ * @param  int       $user_id    ID пользователя
+ *
+ * @return array
+ */
 function get_projects ($link, $user_id) {
     $sql = 'SELECT project.id, project.name, (SELECT COUNT(*) FROM task WHERE task.project_id = project.id AND task.state = 0) AS tasks_count
               FROM project
@@ -78,6 +110,12 @@ function get_projects ($link, $user_id) {
     return $projects;
 }
 
+/**
+ * Добавляет новый проект в базу
+ * @param  mysqli    $link       Ресурс соединения
+ * @param  string    $name       Название проекта
+ * @param  int       $user_id    ID пользователя
+ */
 function add_new_project ($link, $name, $user_id) {
     $sql = 'INSERT INTO project (name, user_id)
               VALUES (?, ?)';
@@ -91,6 +129,14 @@ function add_new_project ($link, $name, $user_id) {
     }
 }
 
+/**
+ * Проверяет, что переданный ID проекта существует в базе
+ * @param  mysqli    $link       Ресурс соединения
+ * @param  int       $user_id    ID пользователя
+ * @param  int       $pr_id      ID проекта
+ *
+ * @return bool
+ */
 function is_correct_project_id ($link, $user_id, $pr_id) {
     $sql = 'SELECT id, user_id
               FROM project
@@ -101,6 +147,14 @@ function is_correct_project_id ($link, $user_id, $pr_id) {
     return $res;
 }
 
+/**
+ * Проверяет, что переданное название проекта существует в базе
+ * @param  mysqli    $link       Ресурс соединения
+ * @param  int       $user_id    ID пользователя
+ * @param  string    $name       Название проекта
+ *
+ * @return bool
+ */
 function is_exist_project_name ($link, $user_id, $name) {
     $sql = 'SELECT name
               FROM project
@@ -110,7 +164,18 @@ function is_exist_project_name ($link, $user_id, $name) {
     return sizeof(db_fetch_data($link, $sql, [$name, $user_id]));
 }
 
-function get_tasks ($link, $user_id, $pr_id, $is_show, $deadline) {
+/**
+ * Возвращает список задач
+ * @param  mysqli    $link       Ресурс соединения
+ * @param  int       $user_id    ID пользователя
+ * @param  int       $pr_id      ID проекта
+ * @param  bool      $is_show    Статус: показывать или нет завершенные задачи
+ * @param  string    $filter     Условие фильтрации задач
+ * @param  string    $search     Подстрока для поиска задач
+ *
+ * @return array
+ */
+function get_tasks ($link, $user_id, $pr_id, $is_show, $filter, $search) {
     $data = [$user_id];
     $additional_conditions = ' ';
 
@@ -121,7 +186,7 @@ function get_tasks ($link, $user_id, $pr_id, $is_show, $deadline) {
     if(!$is_show) {
         $additional_conditions .= ' AND t.state = 0 ';      // если нужно скрыть завершенные задачи (state = 1)
     }
-    switch ($deadline) {                                    // фильтр задач по сроку выполнения
+    switch ($filter) {                                      // фильтр задач по сроку выполнения
         case 'agenda':
             $additional_conditions .= ' AND t.deadline = CURDATE() ';
             break;
@@ -131,6 +196,10 @@ function get_tasks ($link, $user_id, $pr_id, $is_show, $deadline) {
         case 'overdue':
             $additional_conditions .= ' AND t.deadline < CURDATE() ';
             break;
+    }
+    if ($search) {
+        $additional_conditions .= ' AND MATCH(name) AGAINST(?) '; // полнотекстовый поиск
+        $data[] = $search;
     }
 
     $sql = 'SELECT t.id, t.name AS task_name, t.state, t.deadline, t.file 
@@ -142,6 +211,14 @@ function get_tasks ($link, $user_id, $pr_id, $is_show, $deadline) {
     return db_fetch_data($link, $sql, $data);
 }
 
+/**
+ * Возвращает количество задач (всего или для указанного проекта)
+ * @param  mysqli    $link       Ресурс соединения
+ * @param  int       $user_id    ID пользователя
+ * @param  int       $pr_id      ID проекта
+ *
+ * @return int
+ */
 function get_tasks_count ($link, $user_id, $pr_id = null) {
     $data = [$user_id];
     $additional_conditions = ' ';
@@ -162,6 +239,15 @@ function get_tasks_count ($link, $user_id, $pr_id = null) {
     return $array[0]['tasks_count'];
 }
 
+/**
+ * Добавляет новую задачу в базу
+ * @param mysqli    $link       Ресурс соединения
+ * @param int       $user_id    ID пользователя
+ * @param int       $pr_id      ID проекта
+ * @param string    $task_name  Название задачи
+ * @param string    $file_path  Ссылка на файл, загруженный пользователем
+ * @param string    $deadline   Дата, до которой задача должна быть выполнена
+ */
 function add_new_task ($link, $user_id, $pr_id, $task_name, $file_path, $deadline) {
     if ($deadline) {
         $sql = 'INSERT INTO task (date_create, date_done, state, name, file, user_id, project_id, deadline)
@@ -182,20 +268,43 @@ function add_new_task ($link, $user_id, $pr_id, $task_name, $file_path, $deadlin
     }
 }
 
+/**
+ * Обновляет статус задачи
+ * @param mysqli    $link       Ресурс соединения
+ * @param int       $user_id    ID пользователя
+ * @param int       $task_id    ID задачи
+ * @param int       $task_state Статус задачи (0 - не завершена, 1 - завершена)
+ */
 function update_task_state ($link, $user_id, $task_id, $task_state) {
     $sql = 'UPDATE task SET state = ?, date_done = NOW() WHERE id = ? AND user_id = ?';
     db_insert_data($link, $sql, [$task_state, $task_id, $user_id]);
     header("Location: index.php");
 }
 
+/**
+ * Возвращает данные о пользователе по адресу его электронной почты
+ * @param mysqli    $link       Ресурс соединения
+ * @param string    $email      Электронная почта
+ *
+ * @return array|null
+ */
 function get_user ($link, $email) {
     $sql = 'SELECT *
               FROM user
              WHERE email = ?';
 
-    return db_fetch_data($link, $sql, [$email]);
+    $user = db_fetch_data($link, $sql, [$email]);
+
+    return $user[0] ?? null;
 }
 
+/**
+ * Добавляет нового пользователя в базу
+ * @param mysqli    $link       Ресурс соединения
+ * @param string    $email      Электронная почта
+ * @param string    $name       Имя пользователя
+ * @param string    $password   Пароль
+ */
 function add_new_user ($link, $email, $name, $password) {
     $sql = 'INSERT INTO user (date_regist, email, name, password)
               VALUES (NOW(), ?, ?, ?)';
@@ -211,7 +320,8 @@ function add_new_user ($link, $email, $name, $password) {
 
 /**
  * Проверяет, что переданная дата соответствует формату ДД.ММ.ГГГГ
- * @param string $date строка с датой
+ * @param string    $date   Строка с датой
+ *
  * @return bool
  */
 function check_date_format($date) {

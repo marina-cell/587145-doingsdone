@@ -17,24 +17,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    if (!filter_var($form_user['email'], FILTER_VALIDATE_EMAIL)) {
-        $errors['email_format'] = 'Email должен быть корректным';
+    if (isset($form_user['email'])) {
+        if (!filter_var($form_user['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email_format'] = 'Email должен быть корректным';
+        }
     }
 
-    $user = get_user($link, $form_user['email']);
-    $user = $user[0] ?? null;
-
     if(!count($errors)) {
-        if ($user) {
-            if (password_verify($form_user['password'], $user['password'])) {
-                $_SESSION['user'] = $user;
-            }
-            else {
-                $errors['password_invalid'] = 'Неверный пароль';
-            }
+        $user = get_user($link, $form_user['email']);
+
+        if (!$user) {
+            $errors['email_invalid'] = 'Такой пользователь не найден';
+        }
+        else if (password_verify($form_user['password'], $user['password'])) {
+            $_SESSION['user'] = $user;
         }
         else {
-            $errors['email_invalid'] = 'Такой пользователь не найден';
+            $errors['password_invalid'] = 'Неверный пароль';
         }
     }
 }
