@@ -100,7 +100,10 @@ function db_insert_data ($link, $sql, $data = []) {
  * @return array
  */
 function get_projects ($link, $user_id) {
-    $sql = 'SELECT project.id, project.name, (SELECT COUNT(*) FROM task WHERE task.project_id = project.id AND task.state = 0) AS tasks_count
+    $sql = 'SELECT project.id, project.name, 
+                    (SELECT COUNT(*) 
+                       FROM task 
+                      WHERE task.project_id = project.id AND task.state = 0) AS tasks_count
               FROM project
              WHERE user_id = ?
           ORDER BY project.id;';
@@ -209,6 +212,24 @@ function get_tasks ($link, $user_id, $pr_id, $is_show, $filter, $search) {
           ORDER BY t.deadline';
 
     return db_fetch_data($link, $sql, $data);
+}
+
+/**
+ * Возвращает список незавершенных задач на сегодня для всех пользователей
+ * @param  mysqli    $link       Ресурс соединения
+ *
+ * @return array
+ */
+function get_tasks_for_today ($link) {
+    $sql = 'SELECT t.id, t.name AS task_name, t.user_id, t.deadline, user.email, user.name AS user_name
+              FROM task t
+              JOIN user
+                ON t.user_id = user.id
+             WHERE t.deadline = CURDATE()
+               AND t.state = 0
+          ORDER BY t.user_id';
+
+    return db_fetch_data($link, $sql, []);
 }
 
 /**
