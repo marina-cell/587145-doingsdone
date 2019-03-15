@@ -23,19 +23,15 @@ foreach ($users_with_tasks as $key => $row) {
     $message = new Swift_Message();
     $message->setSubject("Уведомление от сервиса «Дела в порядке»");
 
-    if (count($row) === 1) {
-        $text = "У Вас запланирована задача: '" . $row[0]['task_name'] . "' на " . $row[0]['deadline'];
+    $list = [];
+    foreach ($row as $task) {
+        $list[] = "'" . $task['task_name'] . "' на " . $task['deadline'];
     }
-    else {
-        $list = [];
-        foreach ($row as $task) {
-            $list[] = "'" . $task['task_name'] . "' на " . $task['deadline'];
-        }
-        $list = implode(", ", $list);
-        $text = "У Вас запланированы задачи: " . $list;
-    }
+    $list = implode(",\n", $list);
+    $string = count($row) === 1 ? "запланирована задача" : "запланированы задачи";
+    $text = "У Вас " . $string . ":\n" . $list;
 
-    $message->setBody("Уважаемый(ая) " . $row[0]['user_name'] . "! " . $text . ".");
+    $message->setBody("Уважаемый(ая) " . $row[0]['user_name'] . "!\n\n" . $text . ".");
     $message->setFrom(['keks@phpdemo.ru' => 'DoingsDone']);
     $message->setTo([$row[0]['email'] => $row[0]['user_name']]);
     $mailer->send($message);
